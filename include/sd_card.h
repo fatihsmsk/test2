@@ -9,6 +9,9 @@
 
 // Fonksiyon prototipleri
 bool initSDCard();
+int initializeAndRead(); 
+// Tanılama fonksiyonu, satırın son elemanı olup olmadığını belirtmek için bool parametresi eklendi
+void writeDiagnostics(const char* component, int statusCode, bool is_last = false); 
 bool createFolder(fs::FS &fs, const char *path);
 bool createFile(fs::FS &fs, const char *path);
 String readFile(fs::FS &fs, const char *path);

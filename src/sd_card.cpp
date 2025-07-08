@@ -21,34 +21,112 @@ bool initSDCard() {
      return true;
 }
 
+int initializeAndRead() {
+    // SD kartı başlatmayı dene.
+    // initSDCard() zaten loglama yapıyor.
+    if (!initSDCard()) {
+        return 1; // setup_error
+    }
+
+    // SD kart için, başarılı bir başlatma "okunabilir" olduğu anlamına gelir.
+    // Belirli bir "okuma hatası" (2), kartın kendisiyle değil, dosya işlemleriyle ilgili olurdu.
+    return 0; // success
+}
+
+void writeDiagnostics(const char* component, int statusCode, bool is_last) {
+    const char* diagnosticFilePath = DIAGNOSTICS_FILE;
+    const long maxFileSize = 100 * 1024; // 100 KB
+
+    // Dosya boyutunu kontrol et
+    if (SD.exists(diagnosticFilePath)) {
+        File diagnosticFile = SD.open(diagnosticFilePath, FILE_READ);
+        if (diagnosticFile) {
+            if (diagnosticFile.size() > maxFileSize) {
+                diagnosticFile.close(); // Dosyayı silmeden önce kapat
+                LOG_WARN("Tanılama dosyası boyutu 100KB'ı aşıyor. Silme ve yeniden oluşturma.");
+                SD.remove(diagnosticFilePath);
+            } else {
+                diagnosticFile.close();
+            }
+        }
+    }
+
+    // Durum mesajını oluştur
+    String statusMessage = String(component);
+    switch (statusCode) {
+        case 0:
+            statusMessage += "_success";
+            break;
+        case 1:
+            statusMessage += "_setup_error";
+            break;
+        case 2:
+            statusMessage += "_read_error";
+            break;
+        default:
+            statusMessage += "_unknown_error_";
+            statusMessage += String(statusCode);
+            break;
+    }
+    
+    // Virgül gerekip gerekmediğini kontrol et
+    bool needs_comma = false;
+    File file = SD.open(diagnosticFilePath, FILE_READ);
+    if (file && file.size() > 0) {
+        file.seek(file.size() - 1);
+        if (file.read() != '\n') {
+            needs_comma = true;
+        }
+    }
+    file.close();
+
+    String message_to_append;
+    if (needs_comma) {
+        message_to_append += ",";
+    }
+    message_to_append += statusMessage;
+
+    if (is_last) {
+        message_to_append += "\n";
+    }
+
+    // Mesajı dosyaya ekle
+    if (!appendFile(SD, diagnosticFilePath, message_to_append.c_str())) {
+        LOG_ERROR("tanılama dosyasına yazılamadı!");
+    } else {
+        // Başarılı yazma logunu kapatabiliriz, çok fazla log oluşturabilir.
+        // LOG_INFO("Diagnostic written: %s", statusMessage.c_str());
+    }
+}
+
 bool createFolder(fs::FS &fs, const char *path) {
-    Serial.printf("Klasör oluşturuluyor: %s\n", path);
+    LOG_INFO("Klasör oluşturuluyor: %s", path);
     if (fs.mkdir(path)) {
-        Serial.println("Klasör oluşturuldu");
+        LOG_INFO("Klasör oluşturuldu");
         return true;
     } else {
-        Serial.println("Klasör oluşturma başarısız");
+        LOG_ERROR("Klasör oluşturma başarısız");
         return false;
     }
 }
 
 bool createFile(fs::FS &fs, const char *path) {
-    Serial.printf("Dosya oluşturuluyor: %s\n", path);
+    LOG_INFO("Dosya oluşturuluyor: %s", path);
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
-        Serial.println("Dosya oluşturma başarısız");
+        LOG_ERROR("Dosya oluşturma başarısız");
         return false;
     }
     file.close();
-    Serial.println("Dosya oluşturuldu (boş)");
+    LOG_INFO("Dosya oluşturuldu (boş)");
     return true;
 }
 
 String readFile(fs::FS &fs, const char *path) {
-    Serial.printf("Dosya okunuyor: %s\n", path);
+    LOG_INFO("Dosya okunuyor: %s", path);
     File file = fs.open(path, FILE_READ);
     if (!file) {
-        Serial.println("Dosya okuma için açılamadı");
+        LOG_ERROR("Dosya okuma için açılamadı");
         return "";
     }
 
@@ -57,85 +135,82 @@ String readFile(fs::FS &fs, const char *path) {
         fileContent += (char)file.read();
     }
     file.close();
-    Serial.println("Dosya okuma tamamlandı.");
-    // Serial.println(fileContent); // İçeriği yazdırmak için
+    LOG_INFO("Dosya okuma tamamlandı.");
+    // LOG_INFO(fileContent.c_str()); // İçeriği yazdırmak için
     return fileContent;
 }
 
 bool writeFile(fs::FS &fs, const char *path, const char *message) {
-    Serial.printf("Dosyaya yazılıyor: %s\n", path);
+    LOG_INFO("Dosyaya yazılıyor: %s", path);
     File file = fs.open(path, FILE_WRITE);
     if (!file) {
-        Serial.println("Dosya yazma için açılamadı");
+        LOG_ERROR("Dosya yazma için açılamadı");
         return false;
     }
     if (file.print(message)) {
-        Serial.println("Dosyaya yazıldı");
+        LOG_INFO("Dosyaya yazıldı");
         file.close();
         return true;
     } else {
-        Serial.println("Dosyaya yazma başarısız");
+        LOG_ERROR("Dosyaya yazma başarısız");
         file.close();
         return false;
     }
 }
 
 bool appendFile(fs::FS &fs, const char *path, const char *message) {
-    Serial.printf("Dosyaya ekleniyor: %s\n", path);
+    LOG_INFO("Dosyaya ekleniyor: %s", path);
     File file = fs.open(path, FILE_APPEND);
     if (!file) {
-        Serial.println("Dosya ekleme için açılamadı");
+        LOG_ERROR("Dosya ekleme için açılamadı");
         return false;
     }
     if (file.print(message)) {
-        Serial.println("Dosyaya eklendi");
+        LOG_INFO("Dosyaya eklendi");
         file.close();
         return true;
     } else {
-        Serial.println("Dosyaya ekleme başarısız");
+        LOG_ERROR("Dosyaya ekleme başarısız");
         file.close();
         return false;
     }
 }
 
 bool deleteFile(fs::FS &fs, const char *path) {
-    Serial.printf("Dosya siliniyor: %s\n", path);
+    LOG_INFO("Dosya siliniyor: %s", path);
     if (fs.remove(path)) {
-        Serial.println("Dosya silindi");
+        LOG_INFO("Dosya silindi");
         return true;
     } else {
-        Serial.println("Dosya silme başarısız");
+        LOG_ERROR("Dosya silme başarısız");
         return false;
     }
 }
 
 // Yardımcı Fonksiyon: Dizini listelemek için
 void listDir(fs::FS &fs, const char * dirname, uint8_t levels) {
-    Serial.printf("Dizin listeleniyor: %s\n", dirname);
+    LOG_INFO("Dizin listeleniyor: %s", dirname);
 
     File root = fs.open(dirname);
     if (!root) {
-        Serial.println("Dizin açılamadı");
+        LOG_ERROR("Dizin açılamadı");
         return;
     }
     if (!root.isDirectory()) {
-        Serial.println("Bu bir dizin değil");
+        LOG_ERROR("Bu bir dizin değil");
         return;
     }
 
     File file = root.openNextFile();
     while (file) {
         if (file.isDirectory()) {
-            Serial.print("  DIR : ");
-            Serial.println(file.name());
+            LOG_INFO("  DIR : %s", file.name());
             if (levels) {
                 listDir(fs, file.name(), levels - 1);
             }
         } else {
-            Serial.print("  FILE: ");
-            Serial.print(file.name());
-            Serial.print("  SIZE: ");
-            Serial.println(file.size());
+            LOG_INFO("  FILE: %s", file.name());
+            LOG_INFO("  SIZE: %d", file.size());
         }
         file = root.openNextFile();
     }
