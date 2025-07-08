@@ -11,20 +11,19 @@
 // Seri haberleşme baud hızı
 #define SERIAL_BAUD_RATE 115200
 
+#define SD_DATA_FILE "/sensor_data.log"
+#define OTA_FIRMWARE_FILENAME "/firmware.bin" // Firmware'in SD Karta kaydedileceği dosya adı
+#define VERSION_ID_FILE "/version.id"  
+#define FIRST_RUN_DONE_FILE "/first_run_done.txt" // İlk çalıştırmanın tamamlandığını belirten dosya
+#define FIRST_BOOT_DIAGNOSTICS_FILE "/first_boot_diagnostics.txt" 
+#define DIAGNOSTICS_FILE "/diagnostic.txt"
 
-// Cihaz ID'si 
-#define DEVICE_ID "test" // Cihaz ID'si (örneğin, "001", "002", ...)*********************
-
-//#define uykusuresi (20 * 1000000)  // 30 saniye**********************
-#define uykusuresi (3600ULL * 1000000ULL) // 1 saat = 3.600.000.000 µs (64-bit güvenli)*************************
-//#define uykusuresi (7200LL * 1000000LL)  // 2 saat = 7.200.000.000 µs (64-bit güvenli)*************************
+#define uykusuresi (60 * 1000000)  // 100 saniye**********************
+//#define uykusuresi (3600ULL * 1000000ULL) // 1 saat = 3.600.000.000 µs (64-bit güvenli)*************************
+//#define uykusuresi (1800LL * 1000000LL)  // 30dk (64-bit güvenli)*************************
 #define MAX_WAKECOUNTER 1    // verinin gönderileceği maksimum uyanma sayısı
 // SD karta kaydedilecek dosyanın adını bir değişkende tutalım
-#define SD_DATA_FILE "/sensor_data.log"
 
-// GPS Bağlantı Parametreleri
-#define CommStack_ConnGPS_DelayRetry 2000 // GPS bağlantı denemesi gecikmesi (ms) - Varsayılan 2 saniye
-#define CommStack_ConnGPS_MaxRetry   5    // Maksimum GPS bağlantı deneme sayısı - Varsayılan 
 
 // ESP32 UART pinleri (SIM808 için)
 #define UART_RX_PIN 16

@@ -13,6 +13,10 @@ public:
     RtcDateTime getDateTime();
     String getTimestamp(); // "YYYY-MM-DD HH:MM:SS" formatında zaman damgası döndürür
     void printDateTimeToSerial(const RtcDateTime& dt); // Detaylı tarih/saat bilgisini Seri Port'a yazdırır
+    void setDateTime(uint16_t year, uint8_t month, uint8_t day, uint8_t hour, uint8_t minute, uint8_t second); // RTC zamanını ayarlamak için eklendi
+    bool isHealthy(); // RTC'nin sağlıklı çalışıp çalışmadığını kontrol eder
+
+    int initializeAndRead();
 
 private:
     ThreeWire _myWire;

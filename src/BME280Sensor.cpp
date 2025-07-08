@@ -11,14 +11,27 @@ bool BME280Sensor::begin(uint8_t address) {
     return bme.begin(address);
 }
 
+int BME280Sensor::initializeAndRead() {
+    // Sensörü başlatmayı dene
+    if (!begin()) {
+        LOG_ERROR("BME280 sensor setup failed.");
+        return 1; // setup_error
+    }
+
+    // Sensörden veri okumayı dene
+    if (!readBME280WithRetry(5)) {
+        LOG_ERROR("BME280 sensor read failed.");
+        return 2; // read_error
+    }
+    LOG_INFO("BME280 sensor initialized and data read successfully.");
+    return 0; // success
+}
+
 bool BME280Sensor::readData() {
     temperature = bme.readTemperature(); // °C
     humidity = bme.readHumidity();       // %
     pressure = bme.readPressure() / 100.0F; // hPa
-    Serial.println("----- BME280 Sensör Verileri -----");
-    Serial.printf("Hava Sıcaklığı: %.2f °C\n", temperature);
-    Serial.printf("Hava Nem: %.1f %%\n", humidity);
-    Serial.printf("Hava Basıncı: %.2f hPa\n", pressure);
+    LOG_INFO("BME280 verisi okundu: Sıcaklık: %.2f °C, Nem: %.2f %%, Basınç: %.2f hPa", temperature, humidity, pressure);
     return true; // Okuma başarılı sayılır, hata kontrolü istersen buraya eklenebilir
 }
 

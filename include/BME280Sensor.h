@@ -14,6 +14,8 @@ public:
     float getHumidity() const { return humidity; }
     float getPressure() const { return pressure; }
 
+    int initializeAndRead();
+
 private:
     Adafruit_BME280 bme;
     float temperature;
