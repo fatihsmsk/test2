@@ -1,7 +1,0 @@
-.pio/
-.vscode/
-lib/*
-test.log
-emulation.log
-compile_errors.log
-compile_output.txt
