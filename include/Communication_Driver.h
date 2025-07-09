@@ -21,7 +21,7 @@
 #include <TinyGsmClient.h>
 #include <PubSubClient.h>
 #include <SSLClient.h> // Güvenli bağlantı için
-//jjn
+
 
 extern RTC_DATA_ATTR int wakeCounter;
 
