@@ -18,10 +18,10 @@
 #define FIRST_BOOT_DIAGNOSTICS_FILE "/first_boot_diagnostics.txt" 
 #define DIAGNOSTICS_FILE "/diagnostic.txt"
 
-#define uykusuresi (60 * 1000000)  // 100 saniye**********************
-//#define uykusuresi (3600ULL * 1000000ULL) // 1 saat = 3.600.000.000 µs (64-bit güvenli)*************************
+//#define uykusuresi (60 * 1000000)  // 100 saniye**********************
+#define uykusuresi (3600ULL * 1000000ULL) // 1 saat = 3.600.000.000 µs (64-bit güvenli)*************************
 //#define uykusuresi (1800LL * 1000000LL)  // 30dk (64-bit güvenli)*************************
-#define MAX_WAKECOUNTER 1    // verinin gönderileceği maksimum uyanma sayısı
+#define MAX_WAKECOUNTER 4    // verinin gönderileceği maksimum uyanma sayısı
 // SD karta kaydedilecek dosyanın adını bir değişkende tutalım
 
 

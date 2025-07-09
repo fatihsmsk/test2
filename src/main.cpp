@@ -16,7 +16,6 @@
 #include "Communication_Driver.h" 
 #include "sd_card.h"
 #include "RTC_1302.h" 
-//test için yazdım
 String deviceId;
 
 RTC_Module rtc(RTC_IO_PIN, RTC_SCLK_PIN, RTC_CE_PIN);
